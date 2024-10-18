@@ -5,16 +5,8 @@
   <animals name="Lou" spec="//@specs.0"/>
   <animals name="gNathan" spec="//@specs.1"/>
   <animals name="gNatalie" spec="//@specs.1"/>
-  <animals name="Clem0" spec="//@specs.2"/>
-  <animals name="Clem1" spec="//@specs.2"/>
-  <animals name="Clem2" spec="//@specs.2"/>
-  <animals name="Clem3" spec="//@specs.2"/>
-  <animals name="Clem4" spec="//@specs.2"/>
-  <animals name="Clem5" spec="//@specs.2"/>
   <cages name="c2" capacity="2"/>
   <cages name="c4" capacity="4"/>
-  <cages name="c10" capacity="10"/>
   <specs name="lion"/>
   <specs name="gnou"/>
-  <specs name="capybara"/>
 </zoo:Park>

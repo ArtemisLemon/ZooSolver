@@ -86,16 +86,24 @@ public class App {
     }
 
     static void oppositeCSP(Model m, IntVar[][] a, IntVar[][] b){
-        for(int i=0;i<a.length;i++){
-            for(int j=0;j<b.length;j++){
-                IntVar[] aa = a[i];
-                IntVar[] bb = b[j];
-                IntVar aaid = m.intVar(i); //I think consts use singletons, so doing it messy
-                IntVar bbid = m.intVar(j);
-                IntVar aapos = m.intVar(0,magic); //here's the real mess, these are kinda dangling
-                IntVar bbpos = m.intVar(0,magic); //but it doesn't matter, the copies will all have the same values and they don't really play much of a role in propagation
-                m.ifOnlyIf(m.element(bbid,aa,bbpos,0),m.element(aaid,bb,aapos,0));
-            }
+        int al = a.length;
+        int bl = b.length;
+        IntVar[][] aocc = m.intVarMatrix(al, bl, 0,magic);
+        int[] avals = new int[bl];
+        for(int i=0;i<bl;i++) avals[i]=(i);
+        for(int i=0;i<al;i++){
+            m.globalCardinality(a[i],avals,aocc[i],false).post();
+        }
+        
+        IntVar[][] bocc = m.intVarMatrix(bl, al, 0,magic);
+        int[] bvals = new int[al];
+        for(int i=0;i<al;i++) bvals[i]=(i);
+        for(int i=0;i<bl;i++){
+            m.globalCardinality(b[i],bvals,bocc[i],false).post();
+        }
+
+        for(int i=0;i<al;i++) for(int j=0;j<bl;j++){
+            m.ifOnlyIf(m.arithm(aocc[i][j], ">",0), m.arithm(bocc[j][i], ">",0));
         }
     }
 
@@ -283,20 +291,6 @@ public class App {
             System.out.println(a.getName()+" : "+a.getSpec().getName()+cagestat);
         }
         printCages(p2);
-        // Add a new animal, but don't asign a cage
-        // for (Cage c : p2.getCages()){
-        //     System.out.println(c.getName()+", capacity: "+c.getAnimals().size()+"/"+c.getCapacity());
-        //     for(Animal a : c.getAnimals()){
-        //         System.out.println(a.getName()+" : "+a.getSpec().getName());
-        //     }
-        // }
-        // System.out.println("Animals in the Zoo (most of which aren't in cages):");
-        // }
-        // Lou isn't in the cage
-
-
-        // Lets get Choco to put Lou in the Cage
-        // Model m = new Model();
 
         // Here we make our Orders of Objects, List<> provides indexOf
         List<Animal> csp_animals = p2.getAnimals(); 
@@ -306,41 +300,13 @@ public class App {
         ocl_capacity(csp_cages);
         ocl_species(csp_cages);
 
-        // System.out.println(m.toString());
 
-        // Lets make some variables for these Objects
-        // IntVar[] cage2lions = m.intVarArray("cage2lions",3, 0, csp_animals.size());
-        // try {
-        //     cage2lions[0].updateBounds(0, 0, null); //we have data
-        //     cage2lions[1].updateBounds(1, 1, null); //we have data
-        // } catch (Exception e){}
-
-        // IntVar leocage = m.intVar("leocage",csp_cages.indexOf(leo.getCage())); //we have data
-        // IntVar leacage = m.intVar("leacage",csp_cages.indexOf(lea.getCage())); //we have data
-        // IntVar loucage = m.intVar("loucage",0,1); //what cage does Lou go in ?! 
-
-
-
-        // //Opposite
-        // IntVar leocagepos = m.intVar(0, csp_animals.size());
-        // IntVar leoID = m.intVar(csp_animals.indexOf(leo));
-        // m.ifOnlyIf(m.arithm(leocage, "=", 0), m.element(leoID, cage2lions, leocagepos,0));
-
-        // IntVar leacagepos = m.intVar(0, csp_animals.size());
-        // IntVar leaID = m.intVar(csp_animals.indexOf(lea));
-        // m.ifOnlyIf(m.arithm(leacage, "=", 0), m.element(leaID, cage2lions, leacagepos,0));
-
-        // IntVar loucagepos = m.intVar(0, csp_animals.size());
-        // IntVar louID = m.intVar(csp_animals.indexOf(lou));
-        // m.ifOnlyIf(m.arithm(loucage, "=", 0), m.element(louID, cage2lions, loucagepos,0));
-
-
-
-        // IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);
-        // m.getSolver().setSearch(Search.intVarSearch(ArrayUtils.flatten(problemVars)));
+        IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);
+        m.getSolver().setSearch(Search.intVarSearch(ArrayUtils.flatten(problemVars)));
         System.out.println("Solving");
         Solution solution = m.getSolver().findSolution();
         if(solution != null){
+            System.out.println(solution.toString());
             for(var c:csp_cages){
                 int maxCard = c.eClass().getEReferences().getFirst().getUpperBound();
                 int[] values = new int[maxCard];
@@ -351,19 +317,11 @@ public class App {
                     if(values[i]!=cA) zooBuilder.putInCage(csp_animals.get(values[i]), c);
                 }
             }
-            // if(loucage.getValue() < csp_cages.size())
-            //     lou.setCage(csp_cages.get(loucage.getValue()));
-            // System.out.println(solution.toString());
         }
         System.out.println("#######################");
         System.out.println("Zoo Config ############");
-        // for (Cage c : p2.getCages()){
-        //     System.out.println(c.getName());
-        //     for(Animal a : c.getAnimals()){
-        //         System.out.println(a.getName()+" : "+csp_species.get(animal2species.get(a)[0].getValue()).getName());
-        //     }
-        // }
         printCages(p2);
+
         Resource res2 = rs.createResource(URI.createFileURI("myZooConfig.xmi"));
         res2.getContents().add(p2);
         try{
@@ -371,6 +329,5 @@ public class App {
         } catch (Throwable _e) {
             throw Exceptions.sneakyThrow(_e);
         }
-        // System.out.println("See myZoo.xmi for initial data");
     }
 }

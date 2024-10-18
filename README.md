@@ -8,8 +8,12 @@ Il y a aussi des contraintes OCL modelisees' en composant les sub-CSP comme navC
 Based on`git clone https://git.kher.nl/cours/base-xtext.git`
 
 ## Interesting Files
-- model/zoo.xcore
-- src/main/java/mde/App.java
+- model/zoo.xcore (meta-model)
+    - myZoo.xmi (model instance to solve for)
+    - myZooConfig.xmi (solved model instance)
+- src/main/java/mde/ZooBuilder (generate instances .xmi)
+- src/main/java/mde/App.java (translation to Choco solver)
+    - MVIPropagator (additional propagator)
 
 ## Compilation & exécution
 

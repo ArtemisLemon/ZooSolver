@@ -18,7 +18,6 @@ class Park {
     String name
     contains Animal[] animals
     contains Cage[] cages
-    contains Carer[] carers
     contains Species[] specs
 }
 
@@ -36,10 +35,4 @@ class Cage {
 
 class Species {
     String name
-}
-
-class Carer {
-    String name
-    refers Species[] skills
-    refers Cage[] cages
 }

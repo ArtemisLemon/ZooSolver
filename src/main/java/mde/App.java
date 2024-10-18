@@ -32,6 +32,8 @@ public class App {
     static Model m = new Model();
     static int cA,cC,cS; //count of Animals, Cages, Species
 
+    static List<IntVar[]> problemVars;
+
 
     //Ecore Stuff
     // static ZooFactory z = ZooFactory.eINSTANCE;
@@ -94,9 +96,7 @@ public class App {
                 IntVar bbpos = m.intVar(0,magic); //but it doesn't matter, the copies will all have the same values and they don't really play much of a role in propagation
                 m.ifOnlyIf(m.element(bbid,aa,bbpos,0),m.element(aaid,bb,aapos,0));
             }
-
         }
-
     }
 
     static IntVar[] navCSP(Model m, IntVar[] source, IntVar[][] sources, int s, int ss, int lb, int ub, IntVar dummy){
@@ -144,19 +144,24 @@ public class App {
 
         // make Vars
         EReference ec0 = cages.get(0).eClass().getEReferences().getFirst();
-        System.out.println(ec0.getLowerBound());
-        System.out.println(ec0.getUpperBound());
+        // System.out.println(ec0.getLowerBound());
+        // System.out.println(ec0.getUpperBound());
         cage2animal_LinkVars = new ArrayList<>();
         for(var c : cages){
             IntVar[] linkVar = makeLinkVar(m, ec0.getUpperBound(), ec0.getLowerBound(), animals.size());
             cage2animal.put(c, linkVar);
             cage2animal_LinkVars.add(linkVar);
             eRef2LinkVar.put(c.eClass().getEReferences().getFirst(),linkVar);
+            //init data
+            int i=0;
+            for(var a : c.getAnimals()){
+                m.arithm(linkVar[i++],"=",animals.indexOf(a)).post();
+            }
         }
         
         EReference ec = animals.get(0).eClass().getEReferences().getLast();
-        System.out.println(ec.getLowerBound());
-        System.out.println(ec.getUpperBound());
+        // System.out.println(ec.getLowerBound());
+        // System.out.println(ec.getUpperBound());
         List<IntVar[]> animal2cage_LinkVars = new ArrayList<>();
         for(var a : animals){
             IntVar[] linkVar = makeLinkVar(m, ec.getUpperBound(), ec.getLowerBound(), cages.size()); 
@@ -173,9 +178,9 @@ public class App {
 
         ec = animals.get(0).eClass().getEReferences().getFirst();
         List<IntVar[]> animal2species_LinkVars = new ArrayList<>();
-        System.out.println(ec.getLowerBound());
-        System.out.println(ec.getUpperBound());
-        System.out.println(species.size());
+        // System.out.println(ec.getLowerBound());
+        // System.out.println(ec.getUpperBound());
+        // System.out.println(species.size());
         for(var a : animals){
             IntVar[] out = makeLinkVar(m, ec.getUpperBound(), ec.getLowerBound(), species.size());
             animal2species_LinkVars.add(out);
@@ -243,7 +248,16 @@ public class App {
         
     }
 
-
+    static void printCages(Park p){
+        System.out.println("Cages #######");
+        for (Cage c : p.getCages()){
+            System.out.println("##### "+c.getName()+", capacity: "+c.getAnimals().size()+"/"+c.getCapacity());
+            for(Animal a : c.getAnimals()){
+                System.out.println(a.getName()+" : "+a.getSpec().getName());
+            }
+            System.out.println("#####################");
+        }
+    }
 
 
 
@@ -251,8 +265,9 @@ public class App {
     public static void main(String[] args) {
         //Make a Zoo with ZooBuilder
         ZooBuilder zooBuilder = new ZooBuilder();
-        // zooBuilder.makezoofile0();
-        zooBuilder.makezoofile1(7); //n=5 -> 3:39 then n=6 in less time (like 26s)?!?!
+        // zooBuilder.makezoofile0(); // 2cages 3 lions 2 gnou
+        // zooBuilder.makezoofile1(6); //3cages 3 lions 2 gnou n capybara                               //5->3:39 then n=6 in less time (like 26s)?!?!
+        // zooBuilder.makezoofile2(8); //3cages 3 lions 2 gnou n capybara, a lion and a gnou in a cage   //8->1s, 9->54s
 
         //Load a Zoo
         ResourceSetImpl rs = new ResourceSetImpl();
@@ -260,17 +275,22 @@ public class App {
         rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
         Resource res = rs.getResource(URI.createFileURI("myZoo.xmi"), true);
         Park p2 = (Park) res.getContents().get(0);
-        
+
+        System.out.println("Animals ####");
+        for(Animal a : p2.getAnimals()){
+            String cagestat=" in a cage";
+            if(a.getCage()==null) cagestat="";
+            System.out.println(a.getName()+" : "+a.getSpec().getName()+cagestat);
+        }
+        printCages(p2);
         // Add a new animal, but don't asign a cage
-        // Animal lou = makeAnimal("Lou", p2);
         // for (Cage c : p2.getCages()){
+        //     System.out.println(c.getName()+", capacity: "+c.getAnimals().size()+"/"+c.getCapacity());
         //     for(Animal a : c.getAnimals()){
-        //         System.out.println(a.getName());
-        //     }
-        //     for(Animal a : c.getAnimals()){
-        //         System.out.println(a.getName());
+        //         System.out.println(a.getName()+" : "+a.getSpec().getName());
         //     }
         // }
+        // System.out.println("Animals in the Zoo (most of which aren't in cages):");
         // }
         // Lou isn't in the cage
 
@@ -282,13 +302,11 @@ public class App {
         List<Animal> csp_animals = p2.getAnimals(); 
         List<Cage> csp_cages = p2.getCages();
         List<Species> csp_species = p2.getSpecs();
-        // List<Species> csp_species = new ArrayList<>();
-
         uml2CSP(m, csp_cages, csp_animals, csp_species);
         ocl_capacity(csp_cages);
         ocl_species(csp_cages);
 
-        System.out.println(m.toString());
+        // System.out.println(m.toString());
 
         // Lets make some variables for these Objects
         // IntVar[] cage2lions = m.intVarArray("cage2lions",3, 0, csp_animals.size());
@@ -320,6 +338,7 @@ public class App {
 
         // IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);
         // m.getSolver().setSearch(Search.intVarSearch(ArrayUtils.flatten(problemVars)));
+        System.out.println("Solving");
         Solution solution = m.getSolver().findSolution();
         if(solution != null){
             for(var c:csp_cages){
@@ -328,21 +347,30 @@ public class App {
                 IntVar[] linkVar = cage2animal.get(c);
                 for(int i=0;i<maxCard;i++){
                     values[i] = linkVar[i].getValue();
-                    System.out.println(values[i]);
+                    // System.out.println(values[i]);
                     if(values[i]!=cA) zooBuilder.putInCage(csp_animals.get(values[i]), c);
                 }
             }
             // if(loucage.getValue() < csp_cages.size())
             //     lou.setCage(csp_cages.get(loucage.getValue()));
-            System.out.println(solution.toString());
+            // System.out.println(solution.toString());
         }
-
-        System.out.println("Zoo Config");
-        for (Cage c : p2.getCages()){
-            System.out.println(c.getName());
-            for(Animal a : c.getAnimals()){
-                System.out.println(a.getName()+" : "+csp_species.get(animal2species.get(a)[0].getValue()).getName());
-            }
+        System.out.println("#######################");
+        System.out.println("Zoo Config ############");
+        // for (Cage c : p2.getCages()){
+        //     System.out.println(c.getName());
+        //     for(Animal a : c.getAnimals()){
+        //         System.out.println(a.getName()+" : "+csp_species.get(animal2species.get(a)[0].getValue()).getName());
+        //     }
+        // }
+        printCages(p2);
+        Resource res2 = rs.createResource(URI.createFileURI("myZooConfig.xmi"));
+        res2.getContents().add(p2);
+        try{
+            res2.save(null);
+        } catch (Throwable _e) {
+            throw Exceptions.sneakyThrow(_e);
         }
+        // System.out.println("See myZoo.xmi for initial data");
     }
 }

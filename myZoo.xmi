@@ -11,7 +11,6 @@
   <animals name="Clem3" spec="//@specs.2"/>
   <animals name="Clem4" spec="//@specs.2"/>
   <animals name="Clem5" spec="//@specs.2"/>
-  <animals name="Clem6" spec="//@specs.2"/>
   <cages name="c2" capacity="2"/>
   <cages name="c4" capacity="4"/>
   <cages name="c10" capacity="10"/>

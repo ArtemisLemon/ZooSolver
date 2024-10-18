@@ -67,7 +67,7 @@ public class App {
     static IntVar[] makeLinkVar(Model m, int maxCard, int minCard, int numberOfTargets){ //,int data)
         int lb=0;
         int ub=numberOfTargets;
-        if (minCard!=0) //get null pointer out of the domain
+        if (minCard==maxCard) //get null pointer out of the domain
             ub--; //null pointer is 0 or numberOfTargets, depending on where you start counting
             // lb++; //it's one XOR the other
         return m.intVarArray(maxCard, lb,ub);

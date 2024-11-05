@@ -26,6 +26,7 @@ jar {
 }
 
 dependencies {
+    implementation project(':OCLinChoco:lib')
     implementation 'org.choco-solver:choco-solver:+'
     implementation "org.eclipse.xtext:org.eclipse.xtext:+"
     implementation 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:+'

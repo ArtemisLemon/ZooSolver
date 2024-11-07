@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.m2m.atl.core.emf.EMFModel;
 import org.eclipse.m2m.atl.core.emf.EMFModelFactory;
-import org.eclipse.m2m.atl.emftvm.Model;
+// import org.eclipse.m2m.atl.emftvm.Model;
 import org.eclipse.m2m.atl.emftvm.compiler.AtlResourceFactoryImpl;
 import org.eclipse.m2m.atl.engine.parser.AtlParser;
 import org.eclipse.xtext.xbase.lib.Exceptions;
@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.stream.IntStream;
+import java.nio.file.Path;
 
-// import org.oclinchoco.ReferenceTable;
+import org.oclinchoco.ReferenceTable;
 import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
@@ -40,17 +41,17 @@ public class App {
 
     static List<IntVar[]> problemVars;
 
-    // //XMI Loader
-    // static EObject loadInstance(String path){
-    //     ResourceSetImpl rs = new ResourceSetImpl();
-    //     rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
-    //     rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
-    //     Resource res = rs.getResource(URI.createFileURI(path), true);
-    //     return res.getContents().get(0);
-    // }
+    //XMI Loader
+    static EObject loadInstance(String path){
+        ResourceSetImpl rs = new ResourceSetImpl();
+        rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+        rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
+        Resource res = rs.getResource(URI.createFileURI(path), true);
+        return res.getContents().get(0);
+    }
 
 
-    // //ATL Loader
+    // // //ATL Loader
     // static Module loadModule(String path) {
     //     var rs = new ResourceSetImpl();
     //     rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("atl", new AtlResourceFactoryImpl());
@@ -304,12 +305,12 @@ public class App {
         // zooBuilder.makezoofile2(8); //3cages 3 lions 2 gnou n capybara, a lion and a gnou in a cage   //8->1s, 9->54s
 
         //Load a Zoo
-        // Park p2 = (Park) loadInstance("myZoo.xmi");
+        Park p2 = (Park) loadInstance("myZoo.xmi");
         ResourceSetImpl rs = new ResourceSetImpl();
         rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
         rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
-        Resource res = rs.getResource(URI.createFileURI("myZoo.xmi"), true);
-        Park p2 = (Park) res.getContents().get(0);
+        // Resource res = rs.getResource(URI.createFileURI("myZoo.xmi"), true);
+        // Park p2 = (Park) res.getContents().get(0);
 
         System.out.println("Animals ####");
         for(Animal a : p2.getAnimals()){

@@ -5,6 +5,11 @@ import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.m2m.atl.core.emf.EMFModel;
+import org.eclipse.m2m.atl.core.emf.EMFModelFactory;
+import org.eclipse.m2m.atl.emftvm.Model;
+import org.eclipse.m2m.atl.emftvm.compiler.AtlResourceFactoryImpl;
+import org.eclipse.m2m.atl.engine.parser.AtlParser;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 
 import java.util.List;
@@ -12,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.stream.IntStream;
 
+// import org.oclinchoco.ReferenceTable;
 import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
@@ -34,33 +40,53 @@ public class App {
 
     static List<IntVar[]> problemVars;
 
-
-    //Ecore Stuff
-    // static ZooFactory z = ZooFactory.eINSTANCE;
-
-    // static Park initPark(String name){
-    //     Park out = z.createPark();
-    //     out.setName(name);
-    //     return out;
+    // //XMI Loader
+    // static EObject loadInstance(String path){
+    //     ResourceSetImpl rs = new ResourceSetImpl();
+    //     rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
+    //     rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
+    //     Resource res = rs.getResource(URI.createFileURI(path), true);
+    //     return res.getContents().get(0);
     // }
 
-    // static Cage makeCage(String name, Park park){
-    //     Cage out = z.createCage();
-    //     out.setName(name);
-    //     park.getCages().add(out);
-    //     return out;
+
+    // //ATL Loader
+    // static Module loadModule(String path) {
+    //     var rs = new ResourceSetImpl();
+    //     rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("atl", new AtlResourceFactoryImpl());
+
+    //     var parser = AtlParser.getDefault();
+    //     var modelFactory = new EMFModelFactory();
+    //     EMFModel problems = (EMFModel)modelFactory.newModel(parser.getProblemMetamodel());
+    //     rs.getLoadOptions().put("problems", problems);
+
+    //     try {
+
+    //         var transfo = rs.getResource(URI.createURI(path), true);
+    //         var fileName = Path.of(path).getFileName();
+
+    //         for (var e : transfo.getErrors()) {
+    //             System.err.println("error in " + fileName + ": " + e.getLine() + "-" + e.getColumn() + " - " + e.getMessage());
+    //         }
+
+    //         for (var e : transfo.getWarnings()) {
+    //             System.err.println("warning in " + fileName + ": " + e.getLine() + "-" + e.getColumn() + " - " + e.getMessage());
+    //         }
+
+    //         return (Module)transfo.getContents().get(0);
+
+    //     } catch (Exception e) {
+    //         System.err.println("Error reading input file '" + path + "' : " + e.getMessage());
+    //         for (var p : problems.getResource().getContents()) {
+    //             if (p instanceof Problem pb) {
+    //                 System.out.println(pb.getSeverity() + ": " + pb.getLocation() + " - " + pb.getDescription());
+    //             }
+    //         }
+    //     }
+        
+    //     return null;
     // }
 
-    // static Animal makeAnimal(String name, Park park){
-    //     Animal out = z.createAnimal();
-    //     out.setName(name);
-    //     park.getAnimals().add(out);
-    //     return out;
-    // }
-
-    // static void putInCage(Animal animal, Cage cage){
-    //     cage.getAnimals().add(animal);
-    // }
 
 
     //Choco
@@ -278,6 +304,7 @@ public class App {
         // zooBuilder.makezoofile2(8); //3cages 3 lions 2 gnou n capybara, a lion and a gnou in a cage   //8->1s, 9->54s
 
         //Load a Zoo
+        // Park p2 = (Park) loadInstance("myZoo.xmi");
         ResourceSetImpl rs = new ResourceSetImpl();
         rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
         rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);

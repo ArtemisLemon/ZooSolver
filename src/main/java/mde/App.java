@@ -30,6 +30,9 @@ import java.util.Hashtable;
 import java.util.stream.IntStream;
 import java.nio.file.Path;
 
+import org.oclinchoco.CSP;
+import org.oclinchoco.ReferenceTable;
+
 import zoo.*; //This is the model we're trying to solve the problems for, it's designed in xcore
 
 public class App {
@@ -45,12 +48,12 @@ public class App {
         return res.getContents().get(0);
     }
 
-    static void saveInstance(String path, Park p2){
+    static void saveInstance(String path, Park park){
         ResourceSetImpl rs = new ResourceSetImpl();
         rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("xmi", new XMIResourceFactoryImpl());
         rs.getPackageRegistry().put(ZooPackage.eNS_URI,ZooPackage.eINSTANCE);
         Resource res = rs.createResource(URI.createFileURI(path));
-        res.getContents().add(p2);
+        res.getContents().add(park);
         try{
             res.save(null);
         } catch (Throwable _e) {
@@ -140,34 +143,40 @@ public class App {
         // zooBuilder.makezoofile2(8); //3cages 3 lions 2 gnou n capybara, a lion and a gnou in a cage   //8->1s, 9->54s
 
         //Load a Zoo Instance
-        Park p2 = (Park) loadInstance("myZoo.xmi");
+        Park park = (Park) loadInstance("myZoo.xmi");
 
         System.out.println("Animals ####");
-        for(Animal a : p2.getAnimals()){
+        for(Animal a : park.getAnimals()){
             String cagestat=" in a cage";
             if(a.getCage()==null) cagestat="";
             System.out.println(a.getName()+" : "+a.getSpec().getName()+cagestat);
         }
-        printCages(p2);
+        printCages(park);
 
         //Load Zoo Constraints 
-        var m = App.loadModule("model/zoo.atl");
-        System.out.println(m.getName());
-        for (var e : m.getElements()) {
+        var atl = App.loadModule("model/zoo.atl");
+        System.out.println(atl.getName());
+        for (var e : atl.getElements()) {
             if (e instanceof Helper h) {
                 Operation op = (Operation)h.getDefinition().getFeature();
-                System.out.println(App.display(op));
+                System.out.println(h.getDefinition().getContext_().getContext_().getName()+ " : " + App.display(op));
             }
         }
 
-
         // Here we make our Orders of Objects, List<> provides indexOf
-        List<Animal> csp_animals = p2.getAnimals(); 
-        List<Cage> csp_cages = p2.getCages();
-        List<Species> csp_species = p2.getSpecs();
+        List<Animal> animals = park.getAnimals(); 
+        List<Cage> cages = park.getCages();
+        List<Species> species = park.getSpecs();
 
         //Build and Solve CSP
-        
+        CSP m = new CSP();
+
+        ReferenceTable a2c = new ReferenceTable(m,animals.size(),1,1,cages.size());
+        ReferenceTable c2a = new ReferenceTable(m,cages.size(),10,0,animals.size());
+        ReferenceTable a2s = new ReferenceTable(m,animals.size(),1,1,species.size());
+        // ReferenceTable.Opposites(a2c,c2a);
+
+
         // IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);
         // m.getSolver().setSearch(Search.intVarSearch(ArrayUtils.flatten(problemVars)));
         // System.out.println("Solving");
@@ -189,9 +198,10 @@ public class App {
 
 
         // //OutPut
+        m.model().getSolver().printStatistics();
         // System.out.println("#######################");
         // System.out.println("Zoo Config ############");
-        // printCages(p2);
-        // saveInstance("myZooConfig.xmi", p2);
+        // printCages(park);
+        // saveInstance("myZooConfig.xmi", park);
     }
 }

@@ -202,6 +202,14 @@ public class App {
         reftables.put("spec",a2s);
 
 
+        for (var e : atl.getElements()) {
+            if (e instanceof Helper h) {
+                ii=1;
+                Operation op = (Operation)h.getDefinition().getFeature();
+                for (var c : cages) makeCSP(op.getBody());
+            }
+        }
+        
         // IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);
         // m.getSolver().setSearch(Search.intVarSearch(ArrayUtils.flatten(problemVars)));
         // System.out.println("Solving");
@@ -223,6 +231,7 @@ public class App {
 
 
         // //OutPut
+        System.out.println(m.model().toString());
         m.model().getSolver().printStatistics();
         // System.out.println("#######################");
         // System.out.println("Zoo Config ############");

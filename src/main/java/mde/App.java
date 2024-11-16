@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.stream.IntStream;
+import java.lang.ref.Reference;
 import java.nio.file.Path;
 
 import org.oclinchoco.CSP;
@@ -171,10 +172,18 @@ public class App {
         //Build and Solve CSP
         CSP m = new CSP();
 
-        ReferenceTable a2c = new ReferenceTable(m,animals.size(),1,1,cages.size());
-        ReferenceTable c2a = new ReferenceTable(m,cages.size(),10,0,animals.size());
-        ReferenceTable a2s = new ReferenceTable(m,animals.size(),1,1,species.size());
+        // Get cardinalities from metamodel
+        int a2m=1, a2M=1, c2m=0,c2M=10;
+        ReferenceTable a2c = new ReferenceTable(m,animals.size(),a2M,a2m,cages.size());
+        ReferenceTable c2a = new ReferenceTable(m,cages.size(),c2M,c2m,animals.size());
+        ReferenceTable a2s = new ReferenceTable(m,animals.size(),a2M,a2m,species.size());
+        // reftable.loadData(int[][]);
         // ReferenceTable.Opposites(a2c,c2a);
+        // c2a.applyContainment();
+        java.util.Hashtable<String, ReferenceTable> reftables = new Hashtable<>();
+        reftables.put("cage",a2c);
+        reftables.put("animals",c2a);
+        reftables.put("spec",a2s);
 
 
         // IntVar[][] problemVars = cage2animal_LinkVars.toArray(new IntVar[cage2animal_LinkVars.size()][]);

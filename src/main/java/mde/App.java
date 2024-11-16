@@ -10,6 +10,7 @@ import org.eclipse.m2m.atl.common.ATL.Module;
 import org.eclipse.m2m.atl.common.OCL.BooleanType;
 import org.eclipse.m2m.atl.common.OCL.IntegerExp;
 import org.eclipse.m2m.atl.common.OCL.NavigationOrAttributeCallExp;
+import org.eclipse.m2m.atl.common.OCL.OclAnyType;
 import org.eclipse.m2m.atl.common.OCL.OclExpression;
 import org.eclipse.m2m.atl.common.OCL.Operation;
 import org.eclipse.m2m.atl.common.OCL.OperatorCallExp;
@@ -33,12 +34,18 @@ import java.nio.file.Path;
 
 import org.oclinchoco.CSP;
 import org.oclinchoco.ReferenceTable;
+import org.oclinchoco.NavCSP;
+import org.oclinchoco.types.Source;
+import org.oclinchoco.types.NavTable;
 
 import zoo.*; //This is the model we're trying to solve the problems for, it's designed in xcore
 
 public class App {
+    static CSP m = new CSP();
+    static java.util.Hashtable<String, ReferenceTable> reftables = new Hashtable<>();
     static int magic = 100;
     static int cA,cC,cS; //count of Animals, Cages, Species
+    static int ii = 0; //don't look at me
 
     //XMI Loader
     static EObject loadInstance(String path){
@@ -116,8 +123,18 @@ public class App {
 
             case IntegerExp i -> ""+ i.getIntegerSymbol();
             case BooleanType t -> "Boolean";
+            case OclAnyType t -> "OclAny";
             default ->
                 throw new UnsupportedOperationException("don't support " + o);
+        };
+    }
+
+    static NavTable getNavTable(String s){ return reftables.get(s);}
+    static Object makeCSP(OclExpression o){
+        return switch(o){
+            case NavigationOrAttributeCallExp n -> new NavCSP(m,(Source)makeCSP(n.getSource()),getNavTable(n.getName()));
+            case VariableExp v -> reftables.get("animals").adjList(ii++);
+            default -> throw new UnsupportedOperationException("don't support " + o);
         };
     }
 
@@ -170,7 +187,7 @@ public class App {
         List<Species> species = park.getSpecs();
 
         //Build and Solve CSP
-        CSP m = new CSP();
+        // CSP m = new CSP();
 
         // Get cardinalities from metamodel
         int a2m=1, a2M=1, c2m=0,c2M=10;
@@ -180,7 +197,6 @@ public class App {
         // reftable.loadData(int[][]);
         // ReferenceTable.Opposites(a2c,c2a);
         // c2a.applyContainment();
-        java.util.Hashtable<String, ReferenceTable> reftables = new Hashtable<>();
         reftables.put("cage",a2c);
         reftables.put("animals",c2a);
         reftables.put("spec",a2s);

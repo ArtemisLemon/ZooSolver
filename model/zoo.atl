@@ -12,3 +12,4 @@ helper context Zoo!Cage def: test(): OclAny =
 --     self.animals.spec.asSet().size() <= 1;
 --    self.animals.spec.asBag().allEqual(); --not std::ocl
 --    self.animals.spec.asBag().min() = self.animals.spec.asBag().max();
+--    self.animals.spec.min() = self.animals.spec.max(); --should factorise query

@@ -13,8 +13,7 @@ Based on`git clone https://git.kher.nl/cours/base-xtext.git`
     - myZooConfig.xmi (solved model instance)
 - src/main/java/mde/ZooBuilder (generate instances .xmi)
 - src/main/java/mde/App.java (translation to Choco solver)
-    - MVIPropagator (additional propagator)
-
+  
 ## Compilation & exécution
 
 ```bash
